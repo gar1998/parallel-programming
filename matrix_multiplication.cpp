@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <iostream>
+#include <cstdlib>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -12,25 +13,25 @@ vector<long long> read_matrix(const string& filename, size_t& size)
     ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "Ошибка: Не удалось открыть файл " << filename << endl;
+        cerr << "Ошибка: Не удалось открыть файл " << filename << endl;
         exit(1);
     }
 
     file >> size;
 
     vector<long long> matrix_value(size * size);
-    for (int i = 0; i < size * size; ++i)
+    for (size_t i = 0; i < size * size; ++i)
     {
         if (!(file >> matrix_value[i]))
         {
-            std::cerr << "Ошибка: Недостаточно данных в файле " << filename << " для " << size << "x" << size << " матриц" << endl;
+            cerr << "Ошибка: Недостаточно данных в файле " << filename << " для " << size << "x" << size << " матриц" << endl;
             exit(1);
         }
     }
     return matrix_value;
 }
 
-void write_matrix(const string& filename, const vector<long long>& matrix_flat, size_t& size, auto& duration)
+void write_matrix(const string& filename, const vector<long long>& matrix_flat, size_t& size, const chrono::duration<double, milli>& duration)
 {
     ofstream file(filename);
     if (!file.is_open())
@@ -46,7 +47,6 @@ void write_matrix(const string& filename, const vector<long long>& matrix_flat, 
         {
             file << matrix_flat[i * size + j] << (j == size - 1 ? "" : " ");
         }
-
         file << endl;
     }
 
@@ -62,9 +62,9 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size_mpi);
 
-    string file_A = "C:\\Users\\Адель\\Desktop\\lab-1\\lab_3\\parallel-programming\\Data_for_size=2000\\matrix_A.txt";
-    string file_B = "C:\\Users\\Адель\\Desktop\\lab-1\\lab_3\\parallel-programming\\Data_for_size=2000\\matrix_B.txt";
-    string result_file = "C:\\Users\\Адель\\Desktop\\lab-1\\lab_3\\result_C.txt";
+    string file_A = "matrix_A.txt";
+    string file_B = "matrix_B.txt";
+    string result_file = "result_C_" + to_string(size_mpi) + "_.txt";
 
     size_t N = 0;
     vector<long long> A_matrix_values;
